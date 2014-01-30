@@ -9,8 +9,6 @@
  * @link     https://github.com/clawsonm/cakephp-propay
  */
 
-namespace Component;
-
 App::uses('Component', 'Controller');
 
 class ProPayComponent extends Component {
