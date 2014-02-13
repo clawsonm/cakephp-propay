@@ -59,7 +59,7 @@ class ProPayComponent extends Component {
 		if ($createPayerResponse->CreatePayerResult->RequestResult->ResultCode == '00') {
 			$payerId = $createPayerResponse->CreatePayerResult->ExternalAccountID;
 			$event = new CakeEvent(
-				'ProPay.Component.PrePay.createdPayer',
+				'ProPay.Component.ProPay.createdPayer',
 				$this,
 				array(
 					'id' => $payerData['id'],
