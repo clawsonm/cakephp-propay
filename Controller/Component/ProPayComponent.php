@@ -40,7 +40,7 @@ class ProPayComponent extends Component {
  * @return array
  */
 	public function preAuthCard($data) {
-		$status = $this->preAuthCard($data);
+		$status = $this->createPayer($data);
 
 		return $status;
 	}
