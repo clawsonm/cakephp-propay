@@ -53,17 +53,17 @@ class ProPayComponent extends Component {
  * @return boolean
  */
 	public function createPayer($payerData) {
-		$createPayer = new CreatePayer($this->_ID, $payerData['id']);
+		$createPayer = new CreatePayer($this->_ID, $payerData['payerAccountName']);
 		$createPayerResponse = $this->_SPS->CreatePayer($createPayer);
 
 		if ($createPayerResponse->CreatePayerResult->RequestResult->ResultCode == '00') {
-			$payerId = $createPayerResponse->CreatePayerResult->ExternalAccountID;
+			$payerAccountId = $createPayerResponse->CreatePayerResult->ExternalAccountID;
 			$event = new CakeEvent(
 				'ProPay.Component.ProPay.createdPayer',
 				$this,
 				array(
-					'id' => $payerData['id'],
-					'payerId' => $payerId
+					'payerAccountName' => $payerData['payerAccountName'],
+					'payerAccountId' => $payerAccountId
 				)
 			);
 			CakeEventManager::instance()->dispatch($event);
