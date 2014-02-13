@@ -27,7 +27,7 @@ class ProPayComponent extends Component {
 
 	protected $_ID;
 
-	public function initialize($controller) {
+	public function initialize(Controller $controller) {
 		$this->_SPS = new SPS();
 		$this->_ID = new ID(Configure::read('ProPay.AuthenticationToken'), Configure::read('ProPay.BillerAccountId'));
 	}
