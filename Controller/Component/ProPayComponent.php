@@ -11,6 +11,7 @@
 
 App::uses('Component', 'Controller');
 App::uses('CakeEventManager', 'Event');
+App::uses('CakeEvent', 'Event');
 
 /**
  * Class ProPayComponent
@@ -20,6 +21,10 @@ App::uses('CakeEventManager', 'Event');
  * @author   Michael Clawson <macaronisoft@gmail.com>
  * @license  MIT License
  * @link     https://github.com/clawsonm/cakephp-propay
+ *
+ * @property SPS $_SPS
+ * @property ID $_ID
+ *
  */
 class ProPayComponent extends Component {
 
@@ -71,7 +76,7 @@ class ProPayComponent extends Component {
 				$this,
 				array(
 					'payerAccountName' => $payerData['payerAccountName'],
-					'payerAccountId' => $payerAccountId
+					'payerAccountId' => $this->payerAccountId
 				)
 			);
 			CakeEventManager::instance()->dispatch($event);
@@ -98,7 +103,7 @@ class ProPayComponent extends Component {
 			'',
 			'',
 			$paymentData['city'],
-			$paymentData['countryCode'],
+			$paymentData['country'],
 			$paymentData['email'],
 			$paymentData['state'],
 			$paymentData['telephoneNumber'],
@@ -120,7 +125,7 @@ class ProPayComponent extends Component {
 			false
 		);
 
-		$createPaymentMethodResponse = $this->_SPS->createPaymentMethod($this->_ID, $paymentMethodInfo);
+		$createPaymentMethodResponse = $this->_SPS->createPaymentMethod(new CreatePaymentMethod($this->_ID, $paymentMethodInfo));
 
 		if ($createPaymentMethodResponse->CreatePaymentMethodResult->RequestResult->ResultCode == '00') {
 			$this->paymentMethodId = $createPaymentMethodResponse->CreatePaymentMethodResult->PaymentMethodId;
