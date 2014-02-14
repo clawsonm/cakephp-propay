@@ -145,4 +145,55 @@ class ProPayComponent extends Component {
 		}
 	}
 
+/**
+ * call the soap AuthorizePaymentMethodTransaction routine, and return data via events
+ *
+ * @param $paymentData
+ *
+ * @return boolean
+ */
+	public function authorizePaymentTransaction($paymentData) {
+		if (!isset($paymentData['payerAccountId'])) {
+			$paymentData['payerAccountId'] = $this->payerAccountId;
+		}
+		if (!isset($paymentData['paymentMethodId'])) {
+			$paymentData['paymentMethodId'] = $this->paymentMethodId;
+		}
+
+		$creditCardOverrides = new CreditCardOverrides(null, $paymentData['ccv'], null, null);
+		$paymentInfoOverrides = new PaymentInfoOverrides(null, $creditCardOverrides, null);
+		$transaction = new Transaction(
+			$paymentData['amount'] * 100,
+			null,
+			null,
+			$paymentData['currencyCode'],
+			$paymentData['invoice'],
+			null,
+			$paymentData['payerAccountId']
+		);
+
+		$authorizePaymentMethodTransaction = new AuthorizePaymentMethodTransaction($this->_ID, $transaction, $paymentData['paymentMethodId'], $paymentInfoOverrides);
+
+		$authorizePaymentMethodTransactionResponse = $this->_SPS->AuthorizePaymentMethodTransaction($authorizePaymentMethodTransaction);
+
+		if ($authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->RequestResult->ResultCode == '00') {
+			$transactionId = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->Transaction->TransactionId;
+			$authCode = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->Transaction->AuthorizationCode;
+			$event = new CakeEvent(
+				'ProPay.Component.ProPay.authorizedTransaction',
+				$this,
+				array (
+					'invoice' => $paymentData['invoice'],
+					'transactionId' => $transactionId,
+					'authCode' => $authCode
+				)
+			);
+			CakeEventManager::instance()->dispatch($event);
+			return true;
+		} else {
+			debug($authorizePaymentMethodTransactionResponse);
+			return false;
+		}
+	}
+
 } 
