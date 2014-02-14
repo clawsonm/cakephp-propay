@@ -55,6 +55,10 @@ class ProPayComponent extends Component {
 			$status = $this->createPaymentMethod($data);
 		}
 
+		if ($status) {
+			$status = $this->authorizePaymentTransaction($data);
+		}
+
 		return $status;
 	}
 
