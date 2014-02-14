@@ -88,7 +88,7 @@ class ProPayComponent extends Component {
 	}
 
 /**
- * call the soap createPaymentMethod routine, and return data via events
+ * call the soap CreatePaymentMethod routine, and return data via events
  *
  * @param $paymentData
  *
