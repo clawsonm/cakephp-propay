@@ -1,22 +1,21 @@
 <?php
 /**
- * Utility functions (autoloader, etc.)
+ * ProPay Processor
  *
- * @category Controller/Component
+ * @category Lib/Payment
  * @package  cakephp-propay
  * @author   Michael Clawson <macaronisoft@gmail.com>
  * @license  MIT License
  * @link     https://github.com/clawsonm/cakephp-propay
  */
 
-App::uses('Component', 'Controller');
 App::uses('CakeEventManager', 'Event');
 App::uses('CakeEvent', 'Event');
 
 /**
- * Class ProPayComponent
+ * Class ProPayProcessor
  *
- * @category Controller/Component
+ * @category Lib/Payment
  * @package  cakephp-propay
  * @author   Michael Clawson <macaronisoft@gmail.com>
  * @license  MIT License
@@ -26,7 +25,7 @@ App::uses('CakeEvent', 'Event');
  * @property ID $_ID
  *
  */
-class ProPayComponent extends Component {
+class ProPayProcessor {
 
 	protected $_SPS;
 
@@ -36,13 +35,18 @@ class ProPayComponent extends Component {
 
 	public $paymentMethodId;
 
-	public function initialize(Controller $controller) {
+/**
+ * Constructor
+ *
+ * @return ProPayProcessor
+ */
+	public function __construct() {
 		$this->_SPS = new SPS();
 		$this->_ID = new ID(Configure::read('ProPay.AuthenticationToken'), Configure::read('ProPay.BillerAccountId'));
 	}
 
 /**
- * preauth the given card with the given data, and given amount
+ * Preauth the given card with the given data, and given amount
  *
  * @param array $data Card info, Customer info, Amount information
  *
@@ -76,7 +80,7 @@ class ProPayComponent extends Component {
 		if ($createPayerResponse->CreatePayerResult->RequestResult->ResultCode == '00') {
 			$this->payerAccountId = $createPayerResponse->CreatePayerResult->ExternalAccountID;
 			$event = new CakeEvent(
-				'ProPay.Component.ProPay.createdPayer',
+				'ProPay.Payment.ProPay.createdPayer',
 				$this,
 				array(
 					'payerAccountName' => $payerData['payerAccountName'],
@@ -134,7 +138,7 @@ class ProPayComponent extends Component {
 		if ($createPaymentMethodResponse->CreatePaymentMethodResult->RequestResult->ResultCode == '00') {
 			$this->paymentMethodId = $createPaymentMethodResponse->CreatePaymentMethodResult->PaymentMethodId;
 			$event = new CakeEvent(
-				'ProPay.Component.ProPay.createdPaymentMethod',
+				'ProPay.Payment.ProPay.createdPaymentMethod',
 				$this,
 				array (
 					'paymentMethodName' => $paymentData['paymentMethodName'],
@@ -184,7 +188,7 @@ class ProPayComponent extends Component {
 			$transactionId = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->Transaction->TransactionId;
 			$authCode = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->Transaction->AuthorizationCode;
 			$event = new CakeEvent(
-				'ProPay.Component.ProPay.authorizedTransaction',
+				'ProPay.Payment.ProPay.authorizedTransaction',
 				$this,
 				array (
 					'invoice' => $paymentData['invoice'],
