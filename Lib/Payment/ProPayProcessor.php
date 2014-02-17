@@ -27,13 +27,30 @@ App::uses('CakeEvent', 'Event');
  */
 class ProPayProcessor {
 
-	protected $_SPS;
+/**
+ * @var SPS $_SPS
+ */
+	protected $_SPS = null;
 
-	protected $_ID;
+/**
+ * @var ID $_ID
+ */
+	protected $_ID = null;
 
-	public $payerAccountId;
+/**
+ * @var string $payerAccountId
+ */
+	public $payerAccountId = null;
 
-	public $paymentMethodId;
+/**
+ * @var string $paymentMethodId
+ */
+	public $paymentMethodId = null;
+
+/**
+ * @var Result $latestRequestResult
+ */
+	public $latestRequestResult = null;
 
 /**
  * Constructor
@@ -90,7 +107,10 @@ class ProPayProcessor {
 			CakeEventManager::instance()->dispatch($event);
 			return true;
 		} else {
-			debug($createPayerResponse);
+			if (Configure::read('debug') > 0) {
+				CakeLog::debug($createPayerResponse);
+			}
+			$this->latestRequestResult = $createPayerResponse->CreatePayerResult->RequestResult;
 			return false;
 		}
 	}
@@ -139,8 +159,6 @@ class ProPayProcessor {
 			false
 		);
 
-		debug($paymentMethodInfo->Description);
-
 		$createPaymentMethodResponse = $this->_SPS->createPaymentMethod(new CreatePaymentMethod($this->_ID, $paymentMethodInfo));
 
 		if ($createPaymentMethodResponse->CreatePaymentMethodResult->RequestResult->ResultCode == '00') {
@@ -156,7 +174,10 @@ class ProPayProcessor {
 			CakeEventManager::instance()->dispatch($event);
 			return true;
 		} else {
-			debug($createPaymentMethodResponse);
+			if (Configure::read('debug') > 0) {
+				CakeLog::debug($createPaymentMethodResponse);
+			}
+			$this->latestRequestResult = $createPaymentMethodResponse->CreatePaymentMethodResult->RequestResult;
 			return false;
 		}
 	}
@@ -215,7 +236,10 @@ class ProPayProcessor {
 			CakeEventManager::instance()->dispatch($event);
 			return true;
 		} else {
-			debug($authorizePaymentMethodTransactionResponse);
+			if (Configure::read('debug') > 0) {
+				CakeLog::debug($authorizePaymentMethodTransactionResponse);
+			}
+			$this->latestRequestResult = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->RequestResult;
 			return false;
 		}
 	}
