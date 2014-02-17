@@ -100,16 +100,22 @@ class ProPayProcessor {
  *
  * @param $paymentData
  *
+ * @throws InvalidArgumentException
+ *
  * @return boolean
  */
 	public function createPaymentMethod($paymentData) {
 		if (!isset($paymentData['payerAccountId'])) {
 			$paymentData['payerAccountId'] = $this->payerAccountId;
 		}
+		if (!isset($paymentData['payerAccountId'])) {
+			throw new InvalidArgumentException('Payer Account Id is required. Either set it on the object or pass it in.');
+		}
+
 		$billingInfo = new Billing(
 			$paymentData['address1'],
-			'',
-			'',
+			null,
+			null,
 			$paymentData['city'],
 			$paymentData['country'],
 			$paymentData['email'],
@@ -119,12 +125,12 @@ class ProPayProcessor {
 		);
 
 		$paymentMethodInfo = new PaymentMethodAdd(
-			'',
+			null,
 			$paymentData['accountName'],
 			$paymentData['accountNumber'],
-			'',
+			null,
 			$billingInfo,
-			'',
+			$paymentData['paymentMethodType'] . ' ending in ' . substr($paymentData['accountNumber'], -4),
 			'SAVENEW',
 			$paymentData['expirationDate'],
 			$paymentData['payerAccountId'],
@@ -132,6 +138,8 @@ class ProPayProcessor {
 			0,
 			false
 		);
+
+		debug($paymentMethodInfo->Description);
 
 		$createPaymentMethodResponse = $this->_SPS->createPaymentMethod(new CreatePaymentMethod($this->_ID, $paymentMethodInfo));
 
@@ -158,6 +166,8 @@ class ProPayProcessor {
  *
  * @param $paymentData
  *
+ * @throws InvalidArgumentException
+ *
  * @return boolean
  */
 	public function authorizePaymentTransaction($paymentData) {
@@ -166,6 +176,12 @@ class ProPayProcessor {
 		}
 		if (!isset($paymentData['paymentMethodId'])) {
 			$paymentData['paymentMethodId'] = $this->paymentMethodId;
+		}
+		if (!isset($paymentData['payerAccountId'])) {
+			throw new InvalidArgumentException('Payer Account Id is required. Either set it on the object or pass it in.');
+		}
+		if (!isset($paymentData['paymentMethodId'])) {
+			throw new InvalidArgumentException('Payment Method Id is required. Either set it on the object or pass it in.');
 		}
 
 		$creditCardOverrides = new CreditCardOverrides(null, $paymentData['ccv'], null, null);
