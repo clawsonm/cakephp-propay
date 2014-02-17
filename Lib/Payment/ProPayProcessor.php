@@ -107,9 +107,6 @@ class ProPayProcessor {
 			CakeEventManager::instance()->dispatch($event);
 			return true;
 		} else {
-			if (Configure::read('debug') > 0) {
-				CakeLog::debug($createPayerResponse);
-			}
 			$this->latestRequestResult = $createPayerResponse->CreatePayerResult->RequestResult;
 			return false;
 		}
@@ -174,9 +171,6 @@ class ProPayProcessor {
 			CakeEventManager::instance()->dispatch($event);
 			return true;
 		} else {
-			if (Configure::read('debug') > 0) {
-				CakeLog::debug($createPaymentMethodResponse);
-			}
 			$this->latestRequestResult = $createPaymentMethodResponse->CreatePaymentMethodResult->RequestResult;
 			return false;
 		}
@@ -236,9 +230,6 @@ class ProPayProcessor {
 			CakeEventManager::instance()->dispatch($event);
 			return true;
 		} else {
-			if (Configure::read('debug') > 0) {
-				CakeLog::debug($authorizePaymentMethodTransactionResponse);
-			}
 			$this->latestRequestResult = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->RequestResult;
 			return false;
 		}
