@@ -10,6 +10,6 @@ You must generate the SOAP client with wsdl2phpgenerator from [github.com/wsdl2p
 
 e.g. Run:
 
-    ./vender/bin/wsdl2phpgenerator-2.2.2.phar -i http://protectpay.propay.com/API/SPS.svc?wsdl -o generated/
+    ./vender/bin/wsdl2php -i http://protectpay.propay.com/API/SPS.svc?wsdl -o generated/
 
-    ./vender/bin/wsdl2phpgenerator-2.2.2.phar -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o generated/
+    ./vender/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o generated/
