@@ -58,8 +58,12 @@ class ProPayProcessor {
  * @return ProPayProcessor
  */
 	public function __construct() {
-		$this->_SPS = new SPS();
-		$this->_ID = new ID(Configure::read('ProPay.AuthenticationToken'), Configure::read('ProPay.BillerAccountId'));
+		$url = 'http://protectpaytest.propay.com/api/sps.svc?wsdl';
+		if (Configure::check('ProPay.wsdlUrl')) {
+			$url = Configure::read('ProPay.wsdlUrl');
+		}
+		$this->_SPS = new SPS(array (), $url);
+		$this->_ID = new ID(Configure::read('ProPay.authenticationToken'), Configure::read('ProPay.billerAccountId'));
 	}
 
 /**

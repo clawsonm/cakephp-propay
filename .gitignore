@@ -4,4 +4,6 @@
 #editors
 .idea/workspace.xml
 
+# composer
 /vendor/
+composer.lock
