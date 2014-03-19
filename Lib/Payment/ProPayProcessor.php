@@ -62,8 +62,23 @@ class ProPayProcessor {
 		if (Configure::check('ProPay.wsdlUrl')) {
 			$url = Configure::read('ProPay.wsdlUrl');
 		}
-		$this->_SPS = new SPS(array (), $url);
-		$this->_ID = new ID(Configure::read('ProPay.authenticationToken'), Configure::read('ProPay.billerAccountId'));
+		$this->initialize(
+			new SPS(array (), $url),
+			new ID(Configure::read('ProPay.authenticationToken'), Configure::read('ProPay.billerAccountId'))
+		);
+	}
+
+/**
+ * initialization function for setting protected properties for easier testing
+ *
+ * @param SPS $soapClient a configured instance of SPS the soap client
+ * @param ID $soapAuthId a configured instance of ID class for authentication with web service
+ *
+ * @return void
+ */
+	public function initialize(SPS $soapClient, ID $soapAuthId) {
+		$this->_SPS = $soapClient;
+		$this->_ID = $soapAuthId;
 	}
 
 /**
@@ -220,15 +235,15 @@ class ProPayProcessor {
 		$authorizePaymentMethodTransactionResponse = $this->_SPS->AuthorizePaymentMethodTransaction($authorizePaymentMethodTransaction);
 
 		if ($authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->RequestResult->ResultCode == '00') {
-			$transactionId = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->Transaction->TransactionId;
-			$authCode = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->Transaction->AuthorizationCode;
+			$this->transactionId = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->Transaction->TransactionId;
+			$this->authCode = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->Transaction->AuthorizationCode;
 			$event = new CakeEvent(
 				'ProPay.Payment.ProPay.authorizedTransaction',
 				$this,
 				array (
 					'invoice' => $paymentData['invoice'],
-					'transactionId' => $transactionId,
-					'authCode' => $authCode
+					'transactionId' => $this->transactionId,
+					'authCode' => $this->authCode
 				)
 			);
 			CakeEventManager::instance()->dispatch($event);
