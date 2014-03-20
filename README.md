@@ -37,7 +37,7 @@ NOTE: setup.sh uses the production WSDL URL. It assumes that you will specify th
 Non Composer
 -----------------
 
-You must generate the SOAP client with wsdl2phpgenerator from [http://github.com/wsdl2phpgenerator/wsdl2phpgenerator](http://github.com/wsdl2phpgenerator/wsdl2phpgenerator). If you use [Composer](getcomposer.org) it should already be downloaded by composer. Place the generated code in generated/.
+You must generate the SOAP client with wsdl2phpgenerator from [http://github.com/wsdl2phpgenerator/wsdl2phpgenerator](http://github.com/wsdl2phpgenerator/wsdl2phpgenerator). If you use [Composer](http://getcomposer.org) it should already be downloaded by composer. Place the generated code in generated/.
 
 e.g. Run:
 
