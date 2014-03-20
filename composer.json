@@ -2,11 +2,16 @@
     "name": "clawsonm/cakephp-propay",
     "description": "CakePHP 2.x wrapper plugin for ProPay API services. Uses auto generated WSDL.",
     "type": "cakephp-plugin",
+    "keywords": [
+        "cakephp"
+    ],
+    "homepage": "http://github.com/clawsonm/cakephp-propay",
     "license": "MIT",
     "authors": [
         {
             "name": "Michael Clawson",
-            "email": "macaronisoft@gmail.com"
+            "email": "macaronisoft@gmail.com",
+            "role": "Maintainer"
         }
     ],
     "minimum-stability": "dev",
@@ -14,6 +19,10 @@
         "php": ">=5.3.0",
         "composer/installers": "~1.0",
         "wsdl2phpgenerator/wsdl2phpgenerator": "2.3.0"
+    },
+    "support": {
+        "issues": "https://github.com/clawsonm/cakephp-propay/issues",
+        "source": "https://github.com/clawsonm/cakephp-propay"
     },
     "extra": {
         "installer-name": "ProPay"

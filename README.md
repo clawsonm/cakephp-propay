@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/clawsonm/cakephp-propay.png?branch=master)](https://travis-ci.org/clawsonm/cakephp-propay) [![Coverage Status](https://coveralls.io/repos/clawsonm/cakephp-propay/badge.png?branch=master)](https://coveralls.io/r/clawsonm/cakephp-propay?branch=master) [![Total Downloads](https://poser.pugx.org/clawsonm/cakephp-propay/d/total.png)](https://packagist.org/packages/clawsonm/cakephp-propay) [![Latest Stable Version](https://poser.pugx.org/clawsonm/cakephp-propay/v/stable.png)](https://packagist.org/packages/clawsonm/cakephp-propay)
+
+
 cakephp-propay
 ==============
 
@@ -6,16 +9,22 @@ wrapper for propay SOAP service in cakephp. Source WSDL is located at [http://pr
 Installation
 =============
 
-Composer
----------------
+Using [Composer](http://getcomposer.org/)
+------------------------------------------
 
-    composer install
+Add the plugin to your project's `composer.json` - something like this:
 
-or if you're already using composer
+```composer
+  {
+    "require": {
+      "clawsonm/cakephp-propay": "dev-master"
+    }
+  }
+```
 
-    composer update
+Because this plugin has the type `cakephp-plugin` set in its own `composer.json`, Composer will install it inside your `/Plugins` directory, rather than in the usual vendors file. It is recommended that you add `/Plugins/ProPay` to your .gitignore file. (Why? [read this](http://getcomposer.org/doc/faqs/should-i-commit-the-dependencies-in-my-vendor-directory.md).)
 
-then
+You must also generate the SOAP Client classes
 
     path/to/plugin/setup.sh
 
@@ -28,7 +37,7 @@ NOTE: setup.sh uses the production WSDL URL. It assumes that you will specify th
 Non Composer
 -----------------
 
-You must generate the SOAP client with wsdl2phpgenerator from [github.com/wsdl2phpgenerator/wsdl2phpgenerator](github.com/wsdl2phpgenerator/wsdl2phpgenerator). If you use [Composer](getcomposer.org) it should already be downloaded by composer. Place the generated code in generated/.
+You must generate the SOAP client with wsdl2phpgenerator from [http://github.com/wsdl2phpgenerator/wsdl2phpgenerator](http://github.com/wsdl2phpgenerator/wsdl2phpgenerator). If you use [Composer](getcomposer.org) it should already be downloaded by composer. Place the generated code in generated/.
 
 e.g. Run:
 

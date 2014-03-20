@@ -1,6 +1,6 @@
 <?php
 /**
- * All Tests Test Suite
+ * All ProPay Tests Test Suite
  *
  * @category Test
  * @package  cakephp-propay
@@ -8,7 +8,7 @@
  * @license  MIT License
  * @link     https://github.com/clawsonm/cakephp-propay
  */
-class AllTestsTest extends CakeTestSuite {
+class AllProPayTest extends CakeTestCase {
 
 /**
  * define the test suite
@@ -16,8 +16,11 @@ class AllTestsTest extends CakeTestSuite {
  * @return CakeTestSuite
  */
 	public static function suite() {
-		$suite = new CakeTestSuite('All Tests');
-		$suite->addTestDirectoryRecursive(TESTS . 'Case');
+		$suite = new CakeTestSuite('All ProPay test');
+
+		$path = CakePlugin::path('ProPay') . 'Test' . DS . 'Case' . DS;
+		$suite->addTestDirectoryRecursive($path);
+
 		return $suite;
 	}
 
