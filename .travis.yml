@@ -30,10 +30,9 @@ before_script:
   - git clone -b master https://github.com/FriendsOfCake/travis.git --depth 1 ../travis
   - ../travis/before_script.sh
   - cd ../cakephp/app
-  - ./Plugin/ProPay/setup.sh
-  - ls -al vendor
-  - ls -al Plugin/ProPay
+  - ./Plugin/ProPay/setup.sh Plugin/ProPay/generated
   - ls -al Plugin/ProPay/generated
+  - cd ../../cakephp-propay
 
 script:
   - ../travis/script.sh
