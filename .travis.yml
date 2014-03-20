@@ -29,10 +29,11 @@ matrix:
 before_script:
   - git clone -b master https://github.com/FriendsOfCake/travis.git --depth 1 ../travis
   - ../travis/before_script.sh
-  - cd ../cakephp/app/Plugin/ProPay && ./setup.sh
-  - ls -al ../cakephp/app
-  - ls -al ../cakephp/app/Plugin/ProPay
-  - ls -al ../cakephp/app/Plugin/ProPay/generated
+  - cd ../cakephp && ln -s vendors vendor && ./app/Plugin/ProPay/setup.sh
+  - ls -al vendors
+  - ls -al app
+  - ls -al app/Plugin/ProPay
+  - ls -al app/Plugin/ProPay/generated
 
 script:
   - ../travis/script.sh
