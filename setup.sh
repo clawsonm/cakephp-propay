@@ -9,6 +9,6 @@ if [ -z $1 ] ; then
 	else path=$1
 fi
 
-result=$(./vendor/bin/wsdl2php -i http://protectpay.propay.com/API/SPS.svc?wsdl -o $path)
+result=$(./vendor/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o $path)
 
 echo $result
