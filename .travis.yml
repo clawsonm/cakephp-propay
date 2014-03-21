@@ -22,17 +22,11 @@ matrix:
     - php: 5.4
       env:
         - PHPCS=1
-    - php: 5.4
-      env:
-        - FOC_VALIDATE=1
 
 before_script:
   - git clone -b master https://github.com/FriendsOfCake/travis.git --depth 1 ../travis
   - ../travis/before_script.sh
-  - cd ../cakephp/app
-  - ./Plugin/ProPay/setup.sh Plugin/ProPay/generated
-  - ls -al Plugin/ProPay/generated
-  - cd ../../cakephp-propay
+  - ./travis_setup.sh
 
 script:
   - ../travis/script.sh
