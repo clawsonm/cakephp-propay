@@ -82,11 +82,29 @@ class ProPayProcessor {
 	}
 
 /**
+ * charge the given card with the given data, and given amount
+ *
+ * @param array $data Card info, Customer info, Amount information
+ *
+ * @return boolean
+ */
+	public function chargeCard($data) {
+		$status = $this->createPayer($data);
+		if ($status) {
+			$status = $this->createPaymentMethod($data);
+		}
+
+		if ($status) {
+			$status = $this->processPaymentTransaction($data);
+		}
+	}
+
+/**
  * Preauth the given card with the given data, and given amount
  *
  * @param array $data Card info, Customer info, Amount information
  *
- * @return array
+ * @return boolean
  */
 	public function preAuthCard($data) {
 		$status = $this->createPayer($data);
@@ -250,6 +268,65 @@ class ProPayProcessor {
 			return true;
 		} else {
 			$this->latestRequestResult = $authorizePaymentMethodTransactionResponse->AuthorizePaymentMethodTransactionResult->RequestResult;
+			return false;
+		}
+	}
+
+/**
+ * call the soap processPaymentMethodTransaction routine, and return data via events
+ *
+ * @param $paymentData
+ *
+ * @throws InvalidArgumentException
+ *
+ * @return boolean
+ */
+	public function processPaymentTransaction($paymentData) {
+		if (!isset($paymentData['payerAccountId'])) {
+			$paymentData['payerAccountId'] = $this->payerAccountId;
+		}
+		if (!isset($paymentData['paymentMethodId'])) {
+			$paymentData['paymentMethodId'] = $this->paymentMethodId;
+		}
+		if (!isset($paymentData['payerAccountId'])) {
+			throw new InvalidArgumentException('Payer Account Id is required. Either set it on the object or pass it in.');
+		}
+		if (!isset($paymentData['paymentMethodId'])) {
+			throw new InvalidArgumentException('Payment Method Id is required. Either set it on the object or pass it in.');
+		}
+
+		$creditCardOverrides = new CreditCardOverrides(null, $paymentData['ccv'], null, null);
+		$paymentInfoOverrides = new PaymentInfoOverrides(null, $creditCardOverrides, null);
+		$transaction = new Transaction(
+			$paymentData['amount'] * 100,
+			null,
+			null,
+			$paymentData['currencyCode'],
+			$paymentData['invoice'],
+			null,
+			$paymentData['payerAccountId']
+		);
+
+		$processPaymentMethodTransaction = new ProcessPaymentMethodTransaction($this->_ID, $transaction, $paymentData['paymentMethodId'], $paymentInfoOverrides);
+
+		$processPaymentMethodTransactionResponse = $this->_SPS->ProcessPaymentMethodTransaction($processPaymentMethodTransaction);
+
+		if ($processPaymentMethodTransactionResponse->ProcessPaymentMethodTransactionResult->RequestResult->ResultCode == '00') {
+			$this->transactionId = $processPaymentMethodTransactionResponse->ProcessPaymentMethodTransactionResult->Transaction->TransactionId;
+			$this->authCode = $processPaymentMethodTransactionResponse->ProcessPaymentMethodTransactionResult->Transaction->AuthorizationCode;
+			$event = new CakeEvent(
+				'ProPay.Payment.ProPay.processedTransaction',
+				$this,
+				array (
+					'invoice' => $paymentData['invoice'],
+					'transactionId' => $this->transactionId,
+					'authCode' => $this->authCode
+				)
+			);
+			CakeEventManager::instance()->dispatch($event);
+			return true;
+		} else {
+			$this->latestRequestResult = $processPaymentMethodTransactionResponse->ProcessPaymentMethodTransactionResult->RequestResult;
 			return false;
 		}
 	}

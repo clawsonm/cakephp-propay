@@ -19,7 +19,8 @@ class ProPayProcessorTest extends CakeTestCase {
 			array(
 				'CreatePayer',
 				'CreatePaymentMethod',
-				'AuthorizePaymentMethodTransaction'
+				'AuthorizePaymentMethodTransaction',
+				'ProcessPaymentMethodTransaction'
 			),
 			array(
 				array(),
@@ -66,6 +67,25 @@ class ProPayProcessorTest extends CakeTestCase {
 		$PPP->expects($this->once())->method('authorizePaymentTransaction')->will($this->returnValue(true));
 
 		$result = $PPP->preAuthCard(array());
+		$this->assertTrue($result);
+	}
+
+	public function testChargeCard() {
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			array(
+				'createPayer',
+				'createPaymentMethod',
+				'processPaymentTransaction'
+			)
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$PPP->expects($this->once())->method('createPayer')->will($this->returnValue(true));
+		$PPP->expects($this->once())->method('createPaymentMethod')->will($this->returnValue(true));
+		$PPP->expects($this->once())->method('processPaymentTransaction')->will($this->returnValue(true));
+
+		$result = $PPP->chargeCard(array());
 		$this->assertTrue($result);
 	}
 
@@ -195,7 +215,7 @@ class ProPayProcessorTest extends CakeTestCase {
  *
  * @expectedException InvalidArgumentException
  */
-	public function testAuthorizePaymentTransactionNoPaymentMedthodId() {
+	public function testAuthorizePaymentTransactionNoPaymentMethodId() {
 		unset($this->postData['paymentMethodId']);
 		$PPP = $this->getMock(
 			'ProPayProcessor',
@@ -319,6 +339,159 @@ class ProPayProcessorTest extends CakeTestCase {
 		$PPP->initialize($this->soapClient, $this->soapAuthID);
 
 		$result = $PPP->authorizePaymentTransaction($this->postData);
+		$this->assertFalse($result);
+		$this->assertEqual($PPP->latestRequestResult, $ResultCode);
+	}
+
+/**
+ * test processPaymentTransaction with no payerAccountId set in the data array or the class
+ *
+ * @return void
+ *
+ * @expectedException InvalidArgumentException
+ */
+	public function testProcessPaymentTransactionNoPayerAccountId() {
+		unset($this->postData['payerAccountId']);
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			null
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$result = $PPP->processPaymentTransaction($this->postData);
+	}
+
+/**
+ * test processPaymentTransaction with no paymentMethodId set in the data array or the class
+ *
+ * @return void
+ *
+ * @expectedException InvalidArgumentException
+ */
+	public function testProcessPaymentTransactionNoPaymentMethodId() {
+		unset($this->postData['paymentMethodId']);
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			null
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$result = $PPP->processPaymentTransaction($this->postData);
+	}
+
+	public function testProcessPaymentTransactionSuccess() {
+		$ResultCode = new Result('00', 'success', '4321');
+		$TransactionInfo = new TransactionInformation(
+			'Y',
+			'A1111',
+			1.0,
+			20000,
+			'USD',
+			$ResultCode,
+			'randomstring',
+			'4321',
+			'success'
+		);
+		$TransactionResult = new TransactionResult($ResultCode, $TransactionInfo);
+		$ProcessPaymentMethodTransactionResponse = new ProcessPaymentMethodTransactionResponse($TransactionResult);
+		$this->soapClient->expects($this->once())->method('ProcessPaymentMethodTransaction')->will($this->returnValue($ProcessPaymentMethodTransactionResponse));
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			null
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$result = $PPP->processPaymentTransaction($this->postData);
+		$this->assertTrue($result);
+		$this->assertEqual($PPP->transactionId, '4321');
+		$this->assertEqual($PPP->authCode, 'A1111');
+	}
+
+	public function testProcessPaymentTransactionPayerAccountIdAsClassProperty() {
+		$ResultCode = new Result('00', 'success', '4321');
+		$TransactionInfo = new TransactionInformation(
+			'Y',
+			'A1111',
+			1.0,
+			20000,
+			'USD',
+			$ResultCode,
+			'randomstring',
+			'4321',
+			'success'
+		);
+		$TransactionResult = new TransactionResult($ResultCode, $TransactionInfo);
+		$ProcessPaymentMethodTransactionResponse = new ProcessPaymentMethodTransactionResponse($TransactionResult);
+		$this->soapClient->expects($this->once())->method('ProcessPaymentMethodTransaction')->will($this->returnValue($ProcessPaymentMethodTransactionResponse));
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			null
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$PPP->payerAccountId = '1234';
+		unset($this->postData['payerAccountId']);
+
+		$result = $PPP->processPaymentTransaction($this->postData);
+		$this->assertTrue($result);
+		$this->assertEqual($PPP->transactionId, '4321');
+		$this->assertEqual($PPP->authCode, 'A1111');
+	}
+
+	public function testProcessPaymentTransactionPaymentMethodIdAsClassProperty() {
+		$ResultCode = new Result('00', 'success', '4321');
+		$TransactionInfo = new TransactionInformation(
+			'Y',
+			'A1111',
+			1.0,
+			20000,
+			'USD',
+			$ResultCode,
+			'randomstring',
+			'4321',
+			'success'
+		);
+		$TransactionResult = new TransactionResult($ResultCode, $TransactionInfo);
+		$ProcessPaymentMethodTransactionResponse = new ProcessPaymentMethodTransactionResponse($TransactionResult);
+		$this->soapClient->expects($this->once())->method('ProcessPaymentMethodTransaction')->will($this->returnValue($ProcessPaymentMethodTransactionResponse));
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			null
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$PPP->paymentMethodId = '5678';
+		unset($this->postData['paymentMethodId']);
+
+		$result = $PPP->processPaymentTransaction($this->postData);
+		$this->assertTrue($result);
+		$this->assertEqual($PPP->transactionId, '4321');
+		$this->assertEqual($PPP->authCode, 'A1111');
+	}
+
+	public function testProcessPaymentTransactionFail() {
+		$ResultCode = new Result('88', 'fail', '0000');
+		$TransactionInfo = new TransactionInformation(
+			'Y',
+			'0000',
+			1.0,
+			20000,
+			'USD',
+			$ResultCode,
+			'randomstring',
+			'0000',
+			'success'
+		);
+		$TransactionResult = new TransactionResult($ResultCode, $TransactionInfo);
+		$ProcessPaymentMethodTransactionResponse = new ProcessPaymentMethodTransactionResponse($TransactionResult);
+		$this->soapClient->expects($this->once())->method('ProcessPaymentMethodTransaction')->will($this->returnValue($ProcessPaymentMethodTransactionResponse));
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			null
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$result = $PPP->processPaymentTransaction($this->postData);
 		$this->assertFalse($result);
 		$this->assertEqual($PPP->latestRequestResult, $ResultCode);
 	}
