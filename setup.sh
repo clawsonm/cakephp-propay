@@ -11,7 +11,7 @@ fi
 
 result1=$(./vendor/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o $path)
 
-result2=$(sed -i -e "s/class TempTokenResult$/class TempTokenResut extends TempTokensForPayerEditResult/" $path/TempTokenResult.php)
+result2=$(sed -i -e "s/class TempTokenResult$/class TempTokenResult extends TempTokensForPayerEditResult/" $path/TempTokenResult.php)
 
 echo $result1
 echo $result2
