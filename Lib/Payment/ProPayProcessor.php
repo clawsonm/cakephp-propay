@@ -334,4 +334,51 @@ class ProPayProcessor {
 		}
 	}
 
-} 
+/**
+ * call the soap GetTempToken routine, and return data via events
+ *
+ * @param string|integer $payerAccountName some kind of id that will be returned in the event
+ *                                         with payerAccountId so they can be associated.
+ *
+ * @return boolean
+ */
+	public function getTempToken($payerAccountName, $tokenDuration = 600) {
+		$payerInformation = new PayerInformation(null, $payerAccountName);
+		$tempTokenProperties = new TempTokenProperties($tokenDuration);
+		$tempTokenRequest = new TempTokenRequest($this->_ID, $payerInformation, $tempTokenProperties);
+
+		$getTempToken = new GetTempToken($tempTokenRequest);
+
+		$getTempTokenResponse = $this->_SPS->GetTempToken($getTempToken);
+
+		if ($getTempTokenResponse->TempTokenResult->RequestResult->ResultCode == '00') {
+			$this->credentialId = $getTempTokenResponse->TempTokenResult->CredentialId;
+			$this->payerAccountId = $getTempTokenResponse->TempTokenResult->PayerId;
+			$this->tempToken = $getTempTokenResponse->TempTokenResult->TempToken;
+
+			$event = new CakeEvent(
+				'ProPay.Payment.ProPay.createdPayer',
+				$this,
+				array(
+					'payerAccountId' => $this->payerAccountId,
+					'payerAccountName' => $payerAccountName
+				)
+			);
+			CakeEventManager::instance()->dispatch($event);
+			$event2 = new CakeEvent(
+				'ProPay.Payment.ProPay.receivedTempToken',
+				$this,
+				array(
+					'credentialId' => $this->credentialId,
+					'tempToken' => $this->tempToken
+				)
+			);
+			CakeEventManager::instance()->dispatch($event2);
+			return true;
+		} else {
+			$this->latestRequestResult = $getTempTokenResponse->TempTokenResult->ResultCode;
+			return false;
+		}
+	}
+
+}
