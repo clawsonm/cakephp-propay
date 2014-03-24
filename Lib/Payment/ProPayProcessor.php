@@ -90,6 +90,7 @@ class ProPayProcessor {
  */
 	public function chargeCard($data) {
 		$status = $this->createPayer($data);
+
 		if ($status) {
 			$status = $this->createPaymentMethod($data);
 		}
@@ -97,6 +98,8 @@ class ProPayProcessor {
 		if ($status) {
 			$status = $this->processPaymentTransaction($data);
 		}
+
+		return $status;
 	}
 
 /**
