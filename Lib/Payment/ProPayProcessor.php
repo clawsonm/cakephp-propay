@@ -351,10 +351,10 @@ class ProPayProcessor {
 
 		$getTempTokenResponse = $this->_SPS->GetTempToken($getTempToken);
 
-		if ($getTempTokenResponse->TempTokenResult->RequestResult->ResultCode == '00') {
-			$this->credentialId = $getTempTokenResponse->TempTokenResult->CredentialId;
-			$this->payerAccountId = $getTempTokenResponse->TempTokenResult->PayerId;
-			$this->tempToken = $getTempTokenResponse->TempTokenResult->TempToken;
+		if ($getTempTokenResponse->GetTempTokenResult->RequestResult->ResultCode == '00') {
+			$this->credentialId = $getTempTokenResponse->GetTempTokenResult->CredentialId;
+			$this->payerAccountId = $getTempTokenResponse->GetTempTokenResult->PayerId;
+			$this->tempToken = $getTempTokenResponse->GetTempTokenResult->TempToken;
 
 			$event = new CakeEvent(
 				'ProPay.Payment.ProPay.createdPayer',
@@ -376,7 +376,7 @@ class ProPayProcessor {
 			CakeEventManager::instance()->dispatch($event2);
 			return true;
 		} else {
-			$this->latestRequestResult = $getTempTokenResponse->TempTokenResult->ResultCode;
+			$this->latestRequestResult = $getTempTokenResponse->GetTempTokenResult->ResultCode;
 			return false;
 		}
 	}
