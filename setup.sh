@@ -9,6 +9,9 @@ if [ -z $1 ] ; then
 	else path=$1
 fi
 
-result=$(./vendor/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o $path)
+result1=$(./vendor/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o $path)
 
-echo $result
+result2=$(sed -i -e "s/class TempTokenResult$/class TempTokenResut extends TempTokensForPayerEditResult/" $path/TempTokenResult.php)
+
+echo $result1
+echo $result2
