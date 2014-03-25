@@ -20,7 +20,8 @@ class ProPayProcessorTest extends CakeTestCase {
 				'CreatePayer',
 				'CreatePaymentMethod',
 				'AuthorizePaymentMethodTransaction',
-				'ProcessPaymentMethodTransaction'
+				'ProcessPaymentMethodTransaction',
+				'GetTempToken'
 			),
 			array(
 				array(),
@@ -492,6 +493,40 @@ class ProPayProcessorTest extends CakeTestCase {
 		$PPP->initialize($this->soapClient, $this->soapAuthID);
 
 		$result = $PPP->processPaymentTransaction($this->postData);
+		$this->assertFalse($result);
+		$this->assertEqual($PPP->latestRequestResult, $ResultCode);
+	}
+
+	public testGetTempTokenSuccess() {
+		$ResultCode = new Result('00', 'success', '1234');
+		$TempTokenResult = new TempTokenResult('12345678', '1234', $ResultCode, 'asdfqwer1234qwer');
+		$GetTempTokenResponse = new GetTempTokenResponse($TempTokenResult);
+		$this->soapClient->expects($this->once())->method('GetTempToken')->will($this->returnValue($GetTempTokenResponse));
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			null
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$result = $PPP->getTempToken('asdf');
+		$this->assertTrue($result);
+		$this->assertEqual($PPP->credentialId, '12345678');
+		$this->assertEqual($PPP->tempToken, 'asdfqwer1234qwer');
+		$this->assertEqual($PPP->payerAccountId, '1234');
+	}
+
+	public testGetTempTokenFail() {
+		$ResultCode = new Result('88', 'fail', '0000');
+		$TempTokenResult = new TempTokenResult('12345678', '1234', $ResultCode, 'asdfqwer1234qwer');
+		$GetTempTokenResponse = new GetTempTokenResponse($TempTokenResult);
+		$this->soapClient->expects($this->once())->method('GetTempToken')->will($this->returnValue($GetTempTokenResponse));
+		$PPP = $this->getMock(
+			'ProPayProcessor',
+			null
+		);
+		$PPP->initialize($this->soapClient, $this->soapAuthID);
+
+		$result = $PPP->getTempToken('asdf');
 		$this->assertFalse($result);
 		$this->assertEqual($PPP->latestRequestResult, $ResultCode);
 	}
