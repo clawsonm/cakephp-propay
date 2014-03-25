@@ -497,7 +497,7 @@ class ProPayProcessorTest extends CakeTestCase {
 		$this->assertEqual($PPP->latestRequestResult, $ResultCode);
 	}
 
-	public testGetTempTokenSuccess() {
+	public function testGetTempTokenSuccess() {
 		$ResultCode = new Result('00', 'success', '1234');
 		$TempTokenResult = new TempTokenResult('12345678', '1234', $ResultCode, 'asdfqwer1234qwer');
 		$GetTempTokenResponse = new GetTempTokenResponse($TempTokenResult);
@@ -515,7 +515,7 @@ class ProPayProcessorTest extends CakeTestCase {
 		$this->assertEqual($PPP->payerAccountId, '1234');
 	}
 
-	public testGetTempTokenFail() {
+	public function testGetTempTokenFail() {
 		$ResultCode = new Result('88', 'fail', '0000');
 		$TempTokenResult = new TempTokenResult('12345678', '1234', $ResultCode, 'asdfqwer1234qwer');
 		$GetTempTokenResponse = new GetTempTokenResponse($TempTokenResult);
