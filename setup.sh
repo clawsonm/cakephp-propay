@@ -9,9 +9,24 @@ if [ -z $1 ] ; then
 	else path=$1
 fi
 
-result1=$(./vendor/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o $path)
+echo "Generating Soap Client"
+./vendor/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o $path
+if [ $? -ne 0 ]; then
+	echo "Failed generation"
+	exit 1;
+fi
 
-result2=$(sed -i -e "s/class TempTokenResult$/class TempTokenResult extends TempTokensForPayerEditResult/" $path/TempTokenResult.php)
+echo "Editing TempTokenResult as a workaround for bad generation of TempTokenResult on some versions of wsdl2php"
+cat > $path/TempTokenResult.php <<EOF
+<?php
 
-echo $result1
-echo $result2
+class TempTokenResult extends TempTokensForPayerEditResult
+{
+
+}
+EOF
+if [ $? -ne 0 ]; then
+	echo "Failed to edit TempTokenResult.php. GetTempToken might not work."
+	exit 1;
+fi
+echo "success"

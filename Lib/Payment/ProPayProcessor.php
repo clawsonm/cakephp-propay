@@ -376,7 +376,7 @@ class ProPayProcessor {
 			CakeEventManager::instance()->dispatch($event2);
 			return true;
 		} else {
-			$this->latestRequestResult = $getTempTokenResponse->GetTempTokenResult->ResultCode;
+			$this->latestRequestResult = $getTempTokenResponse->GetTempTokenResult->RequestResult;
 			return false;
 		}
 	}
