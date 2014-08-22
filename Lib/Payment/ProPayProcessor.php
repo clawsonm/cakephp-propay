@@ -126,28 +126,29 @@ class ProPayProcessor {
 /**
  * call the soap createPayer routine, and return data via events
  *
- * @param $payerData
+ * @param array $payeeData payer data
  *
  * @return boolean
  */
-	public function createPayer($payerData) {
-		$createPayer = new CreatePayer($this->_ID, $payerData['payerAccountName']);
-		$createPayerResponse = $this->_SPS->CreatePayer($createPayer);
+	public function createPayer($payeeData) {
+		$payerData = new PayerData(null, null, null, $payeeData['payerAccountName']);
+		$createPayerWithData = new CreatePayerWithData($this->_ID, $payerData);
+		$createPayerWithDataResponse = $this->_SPS->CreatePayerWithData($createPayerWithData);
 
-		if ($createPayerResponse->CreatePayerResult->RequestResult->ResultCode == '00') {
-			$this->payerAccountId = $createPayerResponse->CreatePayerResult->ExternalAccountID;
+		if ($createPayerWithDataResponse->CreatePayerWithDataResult->RequestResult->ResultCode == '00') {
+			$this->payerAccountId = $createPayerWithDataResponse->CreatePayerWithDataResult->ExternalAccountID;
 			$event = new CakeEvent(
 				'ProPay.Payment.ProPay.createdPayer',
 				$this,
 				array(
-					'payerAccountName' => $payerData['payerAccountName'],
+					'payerAccountName' => $payeeData['payerAccountName'],
 					'payerAccountId' => $this->payerAccountId
 				)
 			);
 			CakeEventManager::instance()->dispatch($event);
 			return true;
 		} else {
-			$this->latestRequestResult = $createPayerResponse->CreatePayerResult->RequestResult;
+			$this->latestRequestResult = $createPayerWithDataResponse->CreatePayerWithDataResult->RequestResult;
 			return false;
 		}
 	}
@@ -155,7 +156,7 @@ class ProPayProcessor {
 /**
  * call the soap CreatePaymentMethod routine, and return data via events
  *
- * @param $paymentData
+ * @param array $paymentData payment data
  *
  * @throws InvalidArgumentException
  *
@@ -219,7 +220,7 @@ class ProPayProcessor {
 /**
  * call the soap AuthorizePaymentMethodTransaction routine, and return data via events
  *
- * @param $paymentData
+ * @param array $paymentData payment data
  *
  * @throws InvalidArgumentException
  *
@@ -246,9 +247,11 @@ class ProPayProcessor {
 			null,
 			null,
 			$paymentData['currencyCode'],
+			null,
 			$paymentData['invoice'],
 			null,
-			$paymentData['payerAccountId']
+			$paymentData['payerAccountId'],
+			null
 		);
 
 		$authorizePaymentMethodTransaction = new AuthorizePaymentMethodTransaction($this->_ID, $transaction, $paymentData['paymentMethodId'], $paymentInfoOverrides);
@@ -278,7 +281,7 @@ class ProPayProcessor {
 /**
  * call the soap processPaymentMethodTransaction routine, and return data via events
  *
- * @param $paymentData
+ * @param array $paymentData payment data
  *
  * @throws InvalidArgumentException
  *
@@ -305,9 +308,11 @@ class ProPayProcessor {
 			null,
 			null,
 			$paymentData['currencyCode'],
+			null,
 			$paymentData['invoice'],
 			null,
-			$paymentData['payerAccountId']
+			$paymentData['payerAccountId'],
+			null
 		);
 
 		$processPaymentMethodTransaction = new ProcessPaymentMethodTransaction($this->_ID, $transaction, $paymentData['paymentMethodId'], $paymentInfoOverrides);
@@ -339,7 +344,7 @@ class ProPayProcessor {
  *
  * @param string|integer $payerAccountName some kind of id that will be returned in the event
  *                                         with payerAccountId so they can be associated.
- *
+ * @param integer        $tokenDuration    duration of token
  * @return boolean
  */
 	public function getTempToken($payerAccountName, $tokenDuration = 600) {
