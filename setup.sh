@@ -10,7 +10,7 @@ if [ -z $1 ] ; then
 fi
 
 echo "Generating Soap Client"
-./vendor/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o $path
+./Vendor/bin/wsdl2php -i http://protectpaytest.propay.com/api/sps.svc?wsdl -o $path
 if [ $? -ne 0 ]; then
 	echo "Failed generation"
 	exit 1;
